@@ -3,9 +3,33 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <ctype.h>
 
 #define PROMPT "#cisfun$ "
 #define MAX_CMD_LEN 1024
+
+/* Function to trim leading and trailing spaces */
+char *trim_whitespace(char *str)
+{
+    char *end;
+
+    /* Trim leading space */
+    while (isspace((unsigned char)*str))
+        str++;
+
+    if (*str == 0) /* All spaces? */
+        return str;
+
+    /* Trim trailing space */
+    end = str + strlen(str) - 1;
+    while (end > str && isspace((unsigned char)*end))
+        end--;
+
+    /* Write new null terminator character */
+    end[1] = '\0';
+
+    return str;
+}
 
 int main(void)
 {
@@ -19,7 +43,7 @@ int main(void)
     {
         if (is_interactive)
         {
-            printf(PROMPT); /* Display prompt only in interactive mode */
+            printf(PROMPT);
         }
         fflush(stdout);
 
@@ -27,16 +51,18 @@ int main(void)
         {
             if (feof(stdin)) /* Check for end-of-file (Ctrl+D) */
             {
+                printf("\n");
                 return EXIT_SUCCESS;
             }
             perror("fgets");
             return EXIT_FAILURE;
         }
 
-        if (command[strlen(command) - 1] == '\n')
-            command[strlen(command) - 1] = '\0'; /* Remove newline at end */
+        char *trimmed_command = trim_whitespace(command);
+        if (strlen(trimmed_command) == 0) /* Skip empty commands */
+            continue;
 
-        argv[0] = command;
+        argv[0] = trimmed_command;
         argv[1] = NULL;
 
         pid = fork();
@@ -47,9 +73,9 @@ int main(void)
         }
         if (pid == 0)
         {
-            if (execvp(command, argv) == -1)
+            if (execvp(trimmed_command, argv) == -1)
             {
-                perror(command);
+                perror(trimmed_command);
                 return EXIT_FAILURE;
             }
             exit(EXIT_SUCCESS);
