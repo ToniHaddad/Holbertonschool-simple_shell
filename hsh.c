@@ -42,7 +42,6 @@ int main(void)
         pid = fork();
         if (pid == 0)
         {
-            // Child process
             if (execve(buffer, NULL, NULL) == -1)
             {
                 perror(buffer);
