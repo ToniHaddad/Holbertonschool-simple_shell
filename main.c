@@ -21,12 +21,12 @@ int main(void)
 
     while (1)
     {
-        printf(PROMPT); // Display prompt
+        printf(PROMPT); /* Display prompt */
         fflush(stdout);
 
-        if (!fgets(command, MAX_CMD_LEN, stdin)) // Read command from stdin
+        if (!fgets(command, MAX_CMD_LEN, stdin)) /* Read command from stdin */
         {
-            if (feof(stdin)) // Check for end-of-file (Ctrl+D)
+            if (feof(stdin)) /* Check for end-of-file (Ctrl+D) */
             {
                 printf("\n");
                 return EXIT_SUCCESS;
@@ -36,12 +36,12 @@ int main(void)
         }
 
         if (command[strlen(command) - 1] == '\n')
-            command[strlen(command) - 1] = '\0'; // Remove newline at end
+            command[strlen(command) - 1] = '\0'; /* Remove newline at end */
 
-        argv[0] = command; // Prepare arguments for execvp
+        argv[0] = command; /* Prepare arguments for execvp */
         argv[1] = NULL;
 
-        pid = fork(); // Fork a new process
+        pid = fork(); /* Fork a new process */
         if (pid == -1)
         {
             perror("fork");
@@ -49,18 +49,18 @@ int main(void)
         }
         if (pid == 0)
         {
-            // Child process
+            /* Child process */
             if (execvp(command, argv) == -1)
             {
-                perror(command); // Print error if exec fails
+                perror(command); /* Print error if exec fails */
                 return EXIT_FAILURE;
             }
             exit(EXIT_SUCCESS);
         }
         else
         {
-            // Parent process
-            wait(&status); // Wait for child process to finish
+            /* Parent process */
+            wait(&status); /* Wait for child process to finish */
         }
     }
 
