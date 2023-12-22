@@ -19,15 +19,14 @@ int main(void)
 
     while (1)
     {
-        printf(PROMPT);
+        if (isatty(STDIN_FILENO))
+            printf(PROMPT);
 
         nread = getline(&line, &len, stdin);
         if (nread == -1)
         {
             free(line);
-            /*
-             * Handle EOF (Ctrl+D) and errors in reading the line
-             */
+            /* Handle EOF (Ctrl+D) and errors in reading the line */
             if (feof(stdin))
                 break; /* EOF encountered */
             else
@@ -59,7 +58,6 @@ int main(void)
             perror("fork");
             exit(EXIT_FAILURE);
         }
-    }
 
-    return EXIT_SUCCESS;
-}
+        return EXIT_SUCCESS;
+    }
