@@ -51,12 +51,10 @@ int main(void)
         }
         else if (pid < 0)
         {
-            // Error forking
             perror("fork");
         }
         else
         {
-            // Parent process
             waitpid(pid, &status, 0);
         }
     }
