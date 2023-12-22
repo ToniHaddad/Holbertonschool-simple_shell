@@ -37,7 +37,7 @@ int main(void)
             }
         }
 
-        buffer[strcspn(buffer, "\n")] = 0; // Remove newline character
+        buffer[strcspn(buffer, "\n")] = 0;
 
         pid = fork();
         if (pid == 0)
