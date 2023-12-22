@@ -35,6 +35,7 @@ int main(void)
 {
     char command[MAX_CMD_LEN];
     char *argv[2];
+    char *trimmed_command;
     pid_t pid;
     int status;
     int is_interactive = isatty(STDIN_FILENO);
@@ -58,7 +59,7 @@ int main(void)
             return EXIT_FAILURE;
         }
 
-        char *trimmed_command = trim_whitespace(command);
+        trimmed_command = trim_whitespace(command);
         if (strlen(trimmed_command) == 0) /* Skip empty commands */
             continue;
 
@@ -76,7 +77,7 @@ int main(void)
             if (execvp(trimmed_command, argv) == -1)
             {
                 perror(trimmed_command);
-                return EXIT_FAILURE;
+                exit(EXIT_FAILURE);
             }
             exit(EXIT_SUCCESS);
         }
