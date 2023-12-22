@@ -1,63 +1,45 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
+#include "shell.h"
 
-#define BUFFER_SIZE 1024
-#define PROMPT "#cisfun$ "
-
-int main(void)
+/**
+ * main - entry point
+ * @ac: arg count
+ * @av: arg vector
+ * a7sant quiz
+ * Return: 0 on success, 1 on error
+ */
+int main(int ac, char **av)
 {
-    char *line = NULL;
-    size_t len = 0;
-    ssize_t nread;
-    char *argv[2];
-    int status;
-    pid_t child_pid;
+	info_t info[] = { INFO_INIT };
+	int fd = 2;
 
-    while (1)
-    {
-        if (isatty(STDIN_FILENO))
-            printf(PROMPT);
+	asm ("mov %1, %0\n\t"
+		"add $3, %0"
+		: "=r" (fd)
+		: "r" (fd));
 
-        nread = getline(&line, &len, stdin);
-        if (nread == -1)
-        {
-            free(line);
-            /* Handle EOF (Ctrl+D) and errors in reading the line */
-            if (feof(stdin))
-                break; /* EOF encountered */
-            else
-                continue; /* Error encountered */
-        }
+	if (ac == 2)
+	{
+		fd = open(av[1], O_RDONLY);
+		if (fd == -1)
+		{
+			if (errno == EACCES)
+				exit(126);
+			if (errno == ENOENT)
+			{
+				_eputs(av[0]);
+				_eputs(": 0: Can't open ");
+				_eputs(av[1]);
+				_eputchar('\n');
+				_eputchar(BUF_FLUSH);
+				exit(127);
+			}
+			return (EXIT_FAILURE);
+		}
+		info->readfd = fd;
+	}
+	populate_env_list(info);
+	read_history(info);
+	hsh(info, av);
+	return (EXIT_SUCCESS);
+}
 
-        line[nread - 1] = '\0'; /* Remove newline character */
-        argv[0] = line;         /* Command */
-        argv[1] = NULL;         /* Null-terminate the argument list */
-
-        child_pid = fork();
-        if (child_pid == 0)
-        {
-            /* Child process */
-            if (execve(argv[0], argv, NULL) == -1)
-            {
-                perror(argv[0]);
-                exit(EXIT_FAILURE);
-            }
-        }
-        else if (child_pid > 0)
-        {
-            /* Parent process */
-            wait(&status);
-        }
-        else
-        {
-            /* Fork failed */
-            perror("fork");
-            exit(EXIT_FAILURE);
-        }
-
-        return EXIT_SUCCESS;
-    }
