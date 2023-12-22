@@ -19,13 +19,13 @@ int main(void)
     {
         if (is_interactive)
         {
-            printf(PROMPT); // Display prompt only in interactive mode
+            printf(PROMPT); /* Display prompt only in interactive mode */
         }
         fflush(stdout);
 
         if (!fgets(command, MAX_CMD_LEN, stdin))
         {
-            if (feof(stdin)) // Check for end-of-file (Ctrl+D)
+            if (feof(stdin)) /* Check for end-of-file (Ctrl+D) */
             {
                 printf("\n");
                 return EXIT_SUCCESS;
@@ -35,7 +35,7 @@ int main(void)
         }
 
         if (command[strlen(command) - 1] == '\n')
-            command[strlen(command) - 1] = '\0'; // Remove newline at end
+            command[strlen(command) - 1] = '\0'; /* Remove newline at end */
 
         argv[0] = command;
         argv[1] = NULL;
