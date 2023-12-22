@@ -42,7 +42,7 @@ int main(void)
         pid = fork();
         if (pid == 0)
         {
-            if (execve(buffer, NULL, NULL) == -1)
+            if (execve(buffer, , ) == -1)
             {
                 perror(buffer);
                 exit(EXIT_FAILURE);
