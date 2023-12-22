@@ -25,20 +25,23 @@ int main(void)
         if (nread == -1)
         {
             free(line);
+            /*
+             * Handle EOF (Ctrl+D) and errors in reading the line
+             */
             if (feof(stdin))
-                break; // Handle EOF
+                break; /* EOF encountered */
             else
-                continue; // Handle error
+                continue; /* Error encountered */
         }
 
-        line[nread - 1] = '\0'; // Remove newline character
-        argv[0] = line;         // Command
-        argv[1] = NULL;         // Null-terminate the argument list
+        line[nread - 1] = '\0'; /* Remove newline character */
+        argv[0] = line;         /* Command */
+        argv[1] = NULL;         /* Null-terminate the argument list */
 
         child_pid = fork();
         if (child_pid == 0)
         {
-            // Child process
+            /* Child process */
             if (execve(argv[0], argv, NULL) == -1)
             {
                 perror(argv[0]);
@@ -47,12 +50,12 @@ int main(void)
         }
         else if (child_pid > 0)
         {
-            // Parent process
+            /* Parent process */
             wait(&status);
         }
         else
         {
-            // Fork failed
+            /* Fork failed */
             perror("fork");
             exit(EXIT_FAILURE);
         }
