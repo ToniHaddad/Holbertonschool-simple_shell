@@ -2,88 +2,61 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
 #include <sys/wait.h>
-#include <ctype.h>
 
+#define BUFFER_SIZE 1024
 #define PROMPT "#cisfun$ "
-#define MAX_CMD_LEN 1024
-
-/* Function to trim leading and trailing spaces */
-char *trim_whitespace(char *str)
-{
-    char *end;
-
-    /* Trim leading space */
-    while (isspace((unsigned char)*str))
-        str++;
-
-    if (*str == 0) /* All spaces? */
-        return str;
-
-    /* Trim trailing space */
-    end = str + strlen(str) - 1;
-    while (end > str && isspace((unsigned char)*end))
-        end--;
-
-    /* Write new null terminator character */
-    end[1] = '\0';
-
-    return str;
-}
 
 int main(void)
 {
-    char command[MAX_CMD_LEN];
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t nread;
     char *argv[2];
-    char *trimmed_command;
-    pid_t pid;
     int status;
-    int is_interactive = isatty(STDIN_FILENO);
+    pid_t child_pid;
 
     while (1)
     {
-        if (is_interactive)
-        {
-            printf(PROMPT);
-        }
-        fflush(stdout);
+        printf(PROMPT);
 
-        if (!fgets(command, MAX_CMD_LEN, stdin))
+        nread = getline(&line, &len, stdin);
+        if (nread == -1)
         {
-            if (feof(stdin)) /* Check for end-of-file (Ctrl+D) */
+            free(line);
+            if (feof(stdin))
+                break; // Handle EOF
+            else
+                continue; // Handle error
+        }
+
+        line[nread - 1] = '\0'; // Remove newline character
+        argv[0] = line;         // Command
+        argv[1] = NULL;         // Null-terminate the argument list
+
+        child_pid = fork();
+        if (child_pid == 0)
+        {
+            // Child process
+            if (execve(argv[0], argv, NULL) == -1)
             {
-                return EXIT_SUCCESS;
-            }
-            perror("fgets");
-            return EXIT_FAILURE;
-        }
-
-        trimmed_command = trim_whitespace(command);
-        if (strlen(trimmed_command) == 0) /* Skip empty commands */
-            continue;
-
-        argv[0] = trimmed_command;
-        argv[1] = NULL;
-
-        pid = fork();
-        if (pid == -1)
-        {
-            perror("fork");
-            return EXIT_FAILURE;
-        }
-        if (pid == 0)
-        {
-            if (execvp(trimmed_command, argv) == -1)
-            {
-                perror(trimmed_command);
+                perror(argv[0]);
                 exit(EXIT_FAILURE);
             }
-            exit(EXIT_SUCCESS);
+        }
+        else if (child_pid > 0)
+        {
+            // Parent process
+            wait(&status);
         }
         else
         {
-            wait(&status);
+            // Fork failed
+            perror("fork");
+            exit(EXIT_FAILURE);
         }
     }
+
     return EXIT_SUCCESS;
 }
