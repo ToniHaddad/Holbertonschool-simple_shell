@@ -52,7 +52,6 @@ int main(void)
         {
             if (feof(stdin)) /* Check for end-of-file (Ctrl+D) */
             {
-                printf("\n");
                 return EXIT_SUCCESS;
             }
             perror("fgets");
