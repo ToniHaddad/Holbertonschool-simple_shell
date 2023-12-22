@@ -42,7 +42,7 @@ int main(void)
         pid = fork();
         if (pid == 0)
         {
-            if (execve(buffer, , ) == -1)
+            if (int execve(const char *pathname, char *const argv[], char *const envp[]);)
             {
                 perror(buffer);
                 exit(EXIT_FAILURE);
